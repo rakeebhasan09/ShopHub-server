@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-	res.send("Hello World!");
+	res.send("ShopHub is open now!");
 });
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.x65kkeb.mongodb.net/?appName=Cluster0`;
@@ -33,6 +33,26 @@ async function run() {
 		const productsCollection = database.collection("products");
 
 		// Products Related API's
+		app.get("/products", async (req, res) => {
+			const query = {};
+			const { email } = req.query;
+			if (email) {
+				query.email = email;
+			}
+			const cursor = productsCollection
+				.find(query)
+				.sort({ created_at: -1 });
+			const result = await cursor.toArray();
+			res.status(200).send(result);
+		});
+
+		app.get("/products/:id", async (req, res) => {
+			const { id } = req.params;
+			const query = { _id: new ObjectId(id) };
+			const result = await productsCollection.findOne(query);
+			res.status(200).send(result);
+		});
+
 		app.post("/products", async (req, res) => {
 			const product = req.body;
 			product.created_at = new Date();
