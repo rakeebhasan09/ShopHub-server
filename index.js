@@ -46,6 +46,15 @@ async function run() {
 			res.status(200).send(result);
 		});
 
+		app.get("/products/latest", async (req, res) => {
+			const cursor = productsCollection
+				.find()
+				.sort({ created_at: -1 })
+				.limit(3);
+			const result = await cursor.toArray();
+			res.status(200).send(result);
+		});
+
 		app.get("/products/:id", async (req, res) => {
 			const { id } = req.params;
 			const query = { _id: new ObjectId(id) };
