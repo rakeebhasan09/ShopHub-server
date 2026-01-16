@@ -35,9 +35,12 @@ async function run() {
 		// Products Related API's
 		app.get("/products", async (req, res) => {
 			const query = {};
-			const { email } = req.query;
+			const { email, search } = req.query;
 			if (email) {
 				query.email = email;
+			}
+			if (search) {
+				query.$or = [{ title: { $regex: search, $options: "i" } }];
 			}
 			const cursor = productsCollection
 				.find(query)
@@ -50,7 +53,7 @@ async function run() {
 			const cursor = productsCollection
 				.find()
 				.sort({ created_at: -1 })
-				.limit(3);
+				.limit(4);
 			const result = await cursor.toArray();
 			res.status(200).send(result);
 		});
